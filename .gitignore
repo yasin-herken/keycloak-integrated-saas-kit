@@ -1,0 +1,16 @@
+# Environment
+.env
+
+# Generated realm configs (run generate-realm-configs.sh to recreate)
+infrastructure/keycloak/import/
+
+# Docker volumes
+postgres_data/
+keycloak_data/
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
