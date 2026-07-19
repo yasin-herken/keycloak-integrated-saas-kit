@@ -1,0 +1,12 @@
+{
+    "keys": [
+        {
+            "kty": "RSA",
+            "e": "AQAB",
+            "use": "enc",
+            "kid": "archcore-enc-key",
+            "alg": "RSA-OAEP",
+            "n": "oR-5xSFAlM3Dcruvs2uaIEtQ5ClndVz5casCJf_Dkli_p8nubhW2qOzHETVTVg8wsbr0Y0rcTifufw3PLohrTuLqchnQaWO8jULo1hLEXVo9R6XvoTC4czbP3UniFlKTWOtDdyOr29GRiitaKGBkde5z8ev4NBC-_lCoPwSRYZAvVyTPkWweNn7JJfOqOndM5wxqbgP57oh9866BeSeXZOB3c_Ng7bPZBCDYiH-73X34jpwgRhNMczofpHoGxZC7d3aAS0HkWr36-TEhpzoU-VeoImLWQ_8iN8dNXwLctMoQnIb_6urle_etEw-ZLinV3Pa5pli3IZCdQ27kSjfGww"
+        }
+    ]
+}
