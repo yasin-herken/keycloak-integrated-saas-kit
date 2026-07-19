@@ -38,3 +38,11 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+
+archcore:
+  security:
+    jwe:
+      # JWE private key file path
+      # Docker: Mount key file to this path
+      # Kubernetes: Mount Secret/ConfigMap to this path
+      private-key-location: ${JWE_PRIVATE_KEY_LOCATION:/etc/secrets/jwe-private.pem}

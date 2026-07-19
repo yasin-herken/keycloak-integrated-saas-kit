@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  archcore-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      # JWE key location (same as Kubernetes)
+      - JWE_PRIVATE_KEY_LOCATION=/etc/secrets/jwe-private.pem
+      # Keycloak
+      - KEYCLOAK_ISSUER_URI=http://keycloak:8080/realms/archcore
+      # PostgreSQL
+      - POSTGRES_HOST=postgresql
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=gizlisifre
+    volumes:
+      # Mount JWE key file (same as Kubernetes Secret mount)
+      - ./keys/test-private.pem:/etc/secrets/jwe-private.pem:ro
+    depends_on:
+      - keycloak
+      - postgresql
+    networks:
+      - archcore-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev --import-realm
+    ports:
+      - "8080:8080"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    volumes:
+      - ./infrastructure/keycloak/import:/opt/keycloak/data/import
+    networks:
+      - archcore-network
+
+  postgresql:
+    image: postgres:18-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=gizlisifre
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+    networks:
+      - archcore-network
+
+volumes:
+  postgresql-data:
+
+networks:
+  archcore-network:
+    driver: bridge
