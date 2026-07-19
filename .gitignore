@@ -16,4 +16,5 @@ keycloak_data/
 .DS_Store
 /backend/archcore-app/target/**
 /backend/archcore-security/target/**
+/backend/archcore-core/target/**
 /out/**

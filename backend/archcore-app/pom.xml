@@ -18,6 +18,11 @@
     <dependencies>
         <dependency>
             <groupId>com.archcore</groupId>
+            <artifactId>archcore-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.archcore</groupId>
             <artifactId>archcore-security</artifactId>
             <version>${project.version}</version>
         </dependency>
