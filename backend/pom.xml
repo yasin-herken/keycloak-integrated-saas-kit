@@ -23,6 +23,7 @@
     </properties>
 
     <modules>
+        <module>archcore-core</module>
         <module>archcore-security</module>
         <module>archcore-app</module>
     </modules>
