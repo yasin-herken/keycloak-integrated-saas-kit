@@ -42,7 +42,7 @@ management:
 archcore:
   security:
     jwe:
-      # JWE private key file path
-      # Docker: Mount key file to this path
-      # Kubernetes: Mount Secret/ConfigMap to this path
-      private-key-location: ${JWE_PRIVATE_KEY_LOCATION:/etc/secrets/jwe-private.pem}
+      # JWE key locations - defaults to classpath for local development
+      # For Docker/K8s: override with external paths via environment variables
+      private-key-location: ${JWE_PRIVATE_KEY_LOCATION:classpath:keys/test-private.pem}
+      public-key-location: ${JWE_PUBLIC_KEY_LOCATION:classpath:keys/test-public.pem}

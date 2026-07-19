@@ -25,3 +25,5 @@
     - Keycloak container import/export komutları ve environment variable'ları.
     - Spring Security OAuth2 Resource Server stateless (Bearer Token) konfigürasyonları.
 * Ajan, ürettiği konfigürasyonun hangi güncel dokümantasyona (URL veya kaynak) dayandığını commit mesajında veya çıktı raporunda belirtmek zorundadır.
+## 5. Maven
+* Maven settings olarak .mvn/settings.xml dosyası kullanılacaktır. Ajan, Maven dependency eklerken veya güncellerken bu settings.xml dosyasını referans alacaktır.

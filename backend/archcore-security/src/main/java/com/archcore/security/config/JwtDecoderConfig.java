@@ -15,28 +15,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
-import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.stream.Collectors;
 
-/**
- * Configuration for JWE (JSON Web Encryption) JWT Decoder.
- * 
- * Unified approach: Loads private key from a file path.
- * Works with both Docker (volume mount) and Kubernetes (Secret volume mount).
- * 
- * Usage:
- * - Docker: Mount key file to a path, set JWE_PRIVATE_KEY_LOCATION
- * - Kubernetes: Create Secret, mount to pod, set JWE_PRIVATE_KEY_LOCATION
- */
 @Configuration
 public class JwtDecoderConfig {
 
@@ -44,18 +37,29 @@ public class JwtDecoderConfig {
 
     private static final String JWE_ALGORITHM = "RSA-OAEP-256";
     private static final String ENCRYPTION_METHOD = "A256GCM";
+    private static final String KEY_ID = "archcore-enc-key";
 
-    private final RSAPrivateCrtKey privateKey;
+    private final RSAPublicKey publicKey;
+    private final RSAPrivateKey privateKey;
     private final String issuerUri;
 
     public JwtDecoderConfig(
-            @Value("${archcore.security.jwe.private-key-location:/etc/secrets/jwe-private.pem}") String privateKeyLocation,
+            ResourceLoader resourceLoader,
+            @Value("${archcore.security.jwe.private-key-location:classpath:keys/test-private.pem}") String privateKeyLocation,
+            @Value("${archcore.security.jwe.public-key-location:classpath:keys/test-public.pem}") String publicKeyLocation,
             @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri) throws Exception {
-        
+
         this.issuerUri = issuerUri;
-        this.privateKey = loadPrivateKey(privateKeyLocation);
-        
-        logger.info("JWE JwtDecoder configured with key location: {}", privateKeyLocation);
+        this.privateKey = loadPrivateKey(resourceLoader, privateKeyLocation);
+        this.publicKey = loadPublicKey(resourceLoader, publicKeyLocation);
+
+        logger.info("JWE keys loaded successfully. Private key location: {}, Public key location: {}",
+                privateKeyLocation, publicKeyLocation);
+    }
+
+    @Bean
+    public RSAPublicKey archcorePublicKey() {
+        return this.publicKey;
     }
 
     @Bean
@@ -63,7 +67,7 @@ public class JwtDecoderConfig {
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(issuerUri + "/protocol/openid-connect/certs")
                 .jwtProcessorCustomizer(this::configureJweDecryption)
                 .build();
-        
+
         logger.info("JWE JwtDecoder created with issuer URI: {}", issuerUri);
         return decoder;
     }
@@ -76,32 +80,25 @@ public class JwtDecoderConfig {
                 jweJwkSource);
 
         jwtProcessor.setJWEKeySelector(jweKeySelector);
-        logger.debug("JWE decryption configured with algorithm: {}, encryption method: {}", 
+        logger.debug("JWE decryption configured with algorithm: {}, encryption method: {}",
                 JWE_ALGORITHM, ENCRYPTION_METHOD);
     }
 
     private JWKSet createJwkSet() {
-        RSAPublicKey publicKey = (RSAPublicKey) this.privateKey;
         return new JWKSet(
-            new RSAKey.Builder(publicKey)
+            new RSAKey.Builder(this.publicKey)
                 .privateKey(this.privateKey)
+                .keyID(KEY_ID)
                 .keyUse(KeyUse.ENCRYPTION)
+                .algorithm(new com.nimbusds.jose.Algorithm(JWE_ALGORITHM))
                 .build()
         );
     }
 
-    private RSAPrivateCrtKey loadPrivateKey(String location) throws Exception {
+    private RSAPrivateKey loadPrivateKey(ResourceLoader resourceLoader, String location) throws Exception {
         logger.info("Loading private key from: {}", location);
-        
-        // Read the PEM file
-        Path keyPath = Paths.get(location);
-        if (!Files.exists(keyPath)) {
-            throw new IllegalArgumentException("Private key file not found: " + location);
-        }
-        
-        String pemContent = Files.readString(keyPath);
-        
-        // Remove PEM headers and footers
+        String pemContent = readPemContent(resourceLoader, location);
+
         String cleanedPem = pemContent
                 .replace("-----BEGIN PRIVATE KEY-----", "")
                 .replace("-----END PRIVATE KEY-----", "")
@@ -110,10 +107,36 @@ public class JwtDecoderConfig {
         byte[] keyBytes = Base64.getDecoder().decode(cleanedPem);
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        
-        RSAPrivateCrtKey key = (RSAPrivateCrtKey) keyFactory.generatePrivate(keySpec);
+
+        RSAPrivateKey key = (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
         logger.info("Private key loaded successfully from: {}", location);
-        
+
         return key;
+    }
+
+    private RSAPublicKey loadPublicKey(ResourceLoader resourceLoader, String location) throws Exception {
+        logger.info("Loading public key from: {}", location);
+        String pemContent = readPemContent(resourceLoader, location);
+
+        String cleanedPem = pemContent
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "")
+                .replaceAll("\\s", "");
+
+        byte[] keyBytes = Base64.getDecoder().decode(cleanedPem);
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+        RSAPublicKey key = (RSAPublicKey) keyFactory.generatePublic(keySpec);
+        logger.info("Public key loaded successfully from: {}", location);
+
+        return key;
+    }
+
+    private String readPemContent(ResourceLoader resourceLoader, String location) throws Exception {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(resourceLoader.getResource(location).getInputStream(), StandardCharsets.UTF_8))) {
+            return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        }
     }
 }
