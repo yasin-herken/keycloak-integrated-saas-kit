@@ -1,7 +1,7 @@
 {
-  "realm": "${PROJECT_NAME}-prod",
+  "realm": "${PROJECT_NAME}",
   "enabled": true,
-  "displayName": "${PROJECT_NAME} Production",
+  "displayName": "${PROJECT_NAME}",
   "sslRequired": "external",
   "registrationAllowed": false,
   "loginWithEmailAllowed": true,

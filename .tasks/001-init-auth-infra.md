@@ -1,25 +1,25 @@
 ---
 id: 001
-title: Dinamik Keycloak ve PostgreSQL Altyapısının Kurulması
+title: Dynamic Keycloak and PostgreSQL Infrastructure Setup
 agent: infra-agent
 status: pending
 ---
 
-## Görev Tanımı
-Lokal ve canlı ortamlar için `docker-compose.yml` oluşturulacaktır. Altyapı en güncel sürümler (PostgreSQL 17 ve Keycloak latest) kullanılarak kurulacak, projeye ait kritik değişkenler `.env` dosyasından dinamik olarak okunacaktır. Canlı ortam realm adı postfix almayacak, sadece proje adı olacaktır.
+## Task Description
+A `docker-compose.yml` will be created for local and production environments. The infrastructure will be set up using the latest versions (PostgreSQL 17 and Keycloak latest), and critical project variables will be read dynamically from the `.env` file. The production realm name will not have a postfix — it will use only the project name.
 
-## İsterler
-1. Kök dizinde örnek bir `.env.example` dosyası oluşturulacak. İçerisinde `PROJECT_NAME`, veritabanı şifreleri ve Keycloak admin bilgileri için değişkenler bulunacak.
-2. PostgreSQL (v17 imajı) container'ı eklenecek. Şifreler ve veritabanı bilgileri `.env` dosyasından okunacak.
-3. Keycloak (latest imajı) container'ı eklenecek. Veritabanı olarak oluşturulan Postgres 17 container'ına bağlanacak.
-4. Proje dizininde `./infrastructure/keycloak/templates/` klasörü oluşturulacak.
-5. Bu klasörün içine iki adet şablon dosyası eklenecek:
-   * `realm-dev.json.template` (Realm adı: `${PROJECT_NAME}-dev` olarak ayarlanacak)
-   * `realm-prod.json.template` (Realm adı: Sadece `${PROJECT_NAME}` olarak ayarlanacak, postfix kullanılmayacak)
-6. `docker-compose.yml` içindeki Keycloak servisi; container başlatılmadan önce `envsubst` ile bu `.template` dosyalarını okuyup, `.env` dosyasındaki `PROJECT_NAME` değişkenini yerleştirerek gerçek `.json` dosyalarına dönüştürecek ve sisteme import edecek şekilde yapılandırılacak.
+## Requirements
+1. A sample `.env.example` file will be created in the root directory. It will contain variables for `PROJECT_NAME`, database passwords, and Keycloak admin credentials.
+2. A PostgreSQL (v17 image) container will be added. Passwords and database info will be read from the `.env` file.
+3. A Keycloak (latest image) container will be added. It will connect to the PostgreSQL 17 container as its database.
+4. A `./infrastructure/keycloak/templates/` folder will be created in the project directory.
+5. Two template files will be added to this folder:
+   * `realm-dev.json.template` (Realm name: set to `${PROJECT_NAME}-dev`)
+   * `realm-prod.json.template` (Realm name: set to `${PROJECT_NAME}` only — no postfix)
+6. The Keycloak service in `docker-compose.yml` will read these `.template` files before container startup, substitute the `PROJECT_NAME` variable from `.env` using `envsubst`, convert them to actual `.json` files, and import them into the system.
 
-## Kabul Kriterleri (Acceptance Criteria)
-* Müşteri `.env` dosyasındaki `PROJECT_NAME` alanına örneğin "archcore" yazdığında sistem hatasız ayağa kalkmalı.
-* Keycloak paneline girildiğinde realm isimlerinin geliştirme için `archcore-dev`, canlı için doğrudan `archcore` olarak oluştuğu doğrulanmalı.
-* Kullanılan imaj sürümlerinin PostgreSQL 17 ve Keycloak'un en güncel (latest) ana sürümü olduğu konfigürasyonlarda yer almalı.
-* Dosyaların içerisinde statik (hardcoded) hiçbir isim veya şifre bulunmamalı.
+## Acceptance Criteria
+* When the user sets `PROJECT_NAME=archcore` in the `.env` file, the system should start without errors.
+* When accessing the Keycloak panel, realm names should appear as `archcore-dev` for development and `archcore` for production.
+* Image versions should be PostgreSQL 17 and Keycloak's latest major version in the configuration.
+* Files should contain no hardcoded names or passwords.
