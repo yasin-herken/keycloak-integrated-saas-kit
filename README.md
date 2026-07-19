@@ -1,111 +1,111 @@
 # Keycloak Integrated SaaS Kit
 
-Keycloak ve PostgreSQL altyapısını tek komutla ayağa kaldıran hazır geliştirme ortamı.
+Ready-to-use development environment that boots Keycloak and PostgreSQL infrastructure with a single command.
 
-## Hızlı Başlangıç
+## Quick Start
 
-### 1. `.env` dosyasını oluştur
+### 1. Create the `.env` file
 
 ```bash
 cp .env.example .env
 ```
 
-### 2. `.env` dosyasını düzenle
+### 2. Edit the `.env` file
 
 ```env
-PROJECT_NAME=projem              # Realm isimleri buna göre oluşur (projem-dev, projem-prod)
+PROJECT_NAME=myproject              # Realm names are derived from this (myproject-dev, myproject)
 DB_NAME=keycloak
 DB_USER=keycloak
-DB_PASSWORD=sifreniYaz           # Güçlü bir şifre gir
+DB_PASSWORD=yourPassword            # Enter a strong password
 KEYCLOAK_ADMIN_USER=admin
-KEYCLOAK_ADMIN_PASS=sifreniYaz   # Güçlü bir şifre gir
+KEYCLOAK_ADMIN_PASS=yourPassword    # Enter a strong password
 ```
 
-### 3. Realm konfigürasyonlarını oluştur
+### 3. Generate realm configurations
 
 ```bash
 ./generate-realm-configs.sh
 ```
 
-### 4. Container'ları başlat
+### 4. Start the containers
 
 ```bash
 docker compose up -d
 ```
 
-### 5. Çalıştığını doğrula
+### 5. Verify it's running
 
 ```bash
 docker ps
 ```
 
-`archcore-postgres` ve `archcore-keycloak` container'larının running olduğunu görmelisin.
+You should see `myproject-postgres` and `myproject-keycloak` containers in running state.
 
-## Erişim
+## Access
 
-| Servis | URL |
-|--------|-----|
-| Keycloak Admin Paneli | http://localhost:8080 |
+| Service | URL |
+|---------|-----|
+| Keycloak Admin Panel | http://localhost:8080 |
 | PostgreSQL | localhost:5433 |
 
-**Keycloak giriş:** `.env` dosyasında tanımladığın `KEYCLOAK_ADMIN_USER` ve `KEYCLOAK_ADMIN_PASS` bilgileriyle giriş yap.
+**Keycloak login:** Use the `KEYCLOAK_ADMIN_USER` and `KEYCLOAK_ADMIN_PASS` defined in your `.env` file.
 
-## Oluşturulan Realmler
+## Generated Realms
 
-`PROJECT_NAME=projem` olarak ayarlarsan:
+With `PROJECT_NAME=myproject`:
 
-| Realm | Amaç |
-|-------|------|
-| `projem-dev` | Geliştirme ortamı (kayıt açık, SSL kapalı) |
-| `projem-prod` | Üretim ortamı (kayıt kapalı, SSL zorunlu) |
+| Realm | Purpose |
+|-------|---------|
+| `myproject-dev` | Development environment (open registration, SSL not required) |
+| `myproject` | Production environment (registration closed, SSL required) |
 
-## Dosya Yapısı
+## File Structure
 
 ```
-├── .env.example                          # Şablon env dosyası
-├── .env                                  # Gerçek değerler (git'e commit edilmez)
-├── docker-compose.yml                    # Container tanımları
-├── generate-realm-configs.sh             # Template → JSON dönüştürücü
+├── .env.example                          # Template env file
+├── .env                                  # Actual values (not committed to git)
+├── docker-compose.yml                    # Container definitions
+├── generate-realm-configs.sh             # Template → JSON converter
 ├── infrastructure/keycloak/
 │   ├── templates/
-│   │   ├── realm-dev.json.template       # Dev realm şablonu
-│   │   └── realm-prod.json.template      # Prod realm şablonu
+│   │   ├── realm-dev.json.template       # Dev realm template
+│   │   └── realm-prod.json.template      # Prod realm template
 │   └── import/
-│       ├── realm-dev.json                # Oluşturulan (git'e commit edilmez)
-│       └── realm-prod.json               # Oluşturulan (git'e commit edilmez)
+│       ├── realm-dev.json                # Generated (not committed to git)
+│       └── realm-prod.json               # Generated (not committed to git)
 ```
 
-## Yaygın Komutlar
+## Common Commands
 
 ```bash
-# Container'ları durdur
+# Stop containers
 docker compose down
 
-# Container'ları durdur ve verileri sil
+# Stop containers and delete data
 docker compose down -v
 
-# Logları göster
-docker logs archcore-keycloak
-docker logs archcore-postgres
+# Show logs
+docker logs myproject-keycloak
+docker logs myproject-postgres
 
-# Container içine gir
-docker exec -it archcore-keycloak bash
+# Shell into container
+docker exec -it myproject-keycloak bash
 
-# Realm config'leri yeniden oluştur (template değiştirdikten sonra)
+# Regenerate realm configs (after editing templates)
 ./generate-realm-configs.sh && docker compose restart keycloak
 ```
 
 ## Troubleshooting
 
-**Port çakışması:** `docker-compose.yml` dosyasında `5433:5432` olarak ayarlı. Başka bir port kullanırsan orayı değiştir.
+**Port conflict:** The `docker-compose.yml` uses `5433:5432`. Change it if you need a different port.
 
-**Container başlamıyorsa logları kontrol et:**
+**Container not starting — check logs:**
 ```bash
-docker logs archcore-keycloak
-docker logs archcore-postgres
+docker logs myproject-keycloak
+docker logs myproject-postgres
 ```
 
-**Veritabanı sıfırla:**
+**Reset database:**
 ```bash
 docker compose down -v
 ./generate-realm-configs.sh
