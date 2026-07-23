@@ -96,7 +96,7 @@ class JwksClientTest {
                 .thenReturn(errorResponse);
 
         JwksClient freshClient = new JwksClient(JWKS_URL, CACHE_TTL_MS, mockHttpClient);
-        assertThrows(RuntimeException.class, () -> freshClient.getPublicKey());
+        assertThrows(RuntimeException.class, freshClient::getPublicKey);
     }
 
     @Test
