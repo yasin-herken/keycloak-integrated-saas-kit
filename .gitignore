@@ -1,5 +1,7 @@
 # Environment
 .env
+.env.*
+!.env.example
 
 # Generated realm configs (run generate-realm-configs.sh to recreate)
 infrastructure/keycloak/import/
@@ -11,10 +13,41 @@ keycloak_data/
 # IDE
 .idea/
 *.iml
+.vscode/
+*.swp
+*.swo
 
 # OS
 .DS_Store
-/backend/archcore-app/target/**
-/backend/archcore-security/target/**
-/backend/archcore-core/target/**
-/out/**
+Thumbs.db
+
+# Build outputs
+target/
+out/
+build/
+*.class
+*.jar
+*.war
+*.ear
+
+# Secrets and certificates (NEVER commit)
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.truststore
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+*.log
+logs/
+
+# Kotlin
+.kotlin/
+
+# Spring Boot
+spring-boot-*.pid
