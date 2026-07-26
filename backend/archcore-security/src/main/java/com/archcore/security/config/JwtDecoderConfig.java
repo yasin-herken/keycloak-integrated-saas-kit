@@ -13,6 +13,7 @@ import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
@@ -31,6 +32,7 @@ import java.util.Base64;
 import java.util.stream.Collectors;
 
 @Configuration
+@EnableConfigurationProperties(JweProperties.class)
 public class JwtDecoderConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtDecoderConfig.class);
@@ -45,16 +47,15 @@ public class JwtDecoderConfig {
 
     public JwtDecoderConfig(
             ResourceLoader resourceLoader,
-            @Value("${archcore.security.jwe.private-key-location:classpath:keys/test-private.pem}") String privateKeyLocation,
-            @Value("${archcore.security.jwe.public-key-location:classpath:keys/test-public.pem}") String publicKeyLocation,
+            JweProperties jweProperties,
             @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri) throws Exception {
 
         this.issuerUri = issuerUri;
-        this.privateKey = loadPrivateKey(resourceLoader, privateKeyLocation);
-        this.publicKey = loadPublicKey(resourceLoader, publicKeyLocation);
+        this.privateKey = loadPrivateKey(resourceLoader, jweProperties.getPrivateKeyLocation());
+        this.publicKey = loadPublicKey(resourceLoader, jweProperties.getPublicKeyLocation());
 
         logger.info("JWE keys loaded successfully. Private key location: {}, Public key location: {}",
-                privateKeyLocation, publicKeyLocation);
+                jweProperties.getPrivateKeyLocation(), jweProperties.getPublicKeyLocation());
     }
 
     @Bean

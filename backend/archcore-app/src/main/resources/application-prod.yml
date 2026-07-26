@@ -1,0 +1,10 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+archcore:
+  security:
+    jwe:
+      private-key-location: ${JWE_PRIVATE_KEY_PATH}
+      public-key-location: ${JWE_PUBLIC_KEY_PATH}

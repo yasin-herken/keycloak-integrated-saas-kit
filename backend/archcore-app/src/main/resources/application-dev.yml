@@ -1,0 +1,10 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+archcore:
+  security:
+    jwe:
+      private-key-location: classpath:keys/test-private.pem
+      public-key-location: classpath:keys/test-public.pem
