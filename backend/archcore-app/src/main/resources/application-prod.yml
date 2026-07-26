@@ -10,3 +10,6 @@ archcore:
     jwe:
       private-key-location: ${JWE_PRIVATE_KEY_PATH}
       public-key-location: ${JWE_PUBLIC_KEY_PATH}
+      jwe-algorithm: ${JWE_ALGORITHM:RSA-OAEP-256}
+      encryption-method: ${JWE_ENCRYPTION_METHOD:A256GCM}
+      key-id: ${JWE_KEY_ID:archcore-enc-key}
