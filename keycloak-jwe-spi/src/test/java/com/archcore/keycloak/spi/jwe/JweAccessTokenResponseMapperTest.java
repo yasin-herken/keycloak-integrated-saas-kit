@@ -19,6 +19,7 @@ import org.keycloak.representations.AccessTokenResponse;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
@@ -62,7 +63,18 @@ class JweAccessTokenResponseMapperTest {
     }
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
+        JweProviderConfig testConfig = new JweProviderConfig();
+        testConfig.setDefaultJwksUrl("http://localhost:8081/.well-known/jwks.json");
+        testConfig.setDefaultCacheTtlMs(300000L);
+        testConfig.setJweAlgorithm("RSA-OAEP-256");
+        testConfig.setEncryptionMethod("A256GCM");
+        testConfig.setKeyId("archcore-enc-key");
+
+        Field configField = JweAccessTokenResponseMapper.class.getDeclaredField("providerConfig");
+        configField.setAccessible(true);
+        configField.set(null, testConfig);
+
         mapper = new JweAccessTokenResponseMapper();
         mappingModel = new ProtocolMapperModel();
         Map<String, String> config = new HashMap<>();
