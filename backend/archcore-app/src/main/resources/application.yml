@@ -1,6 +1,8 @@
 spring:
   application:
     name: archcore-app
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5433}/${POSTGRES_DB:keycloak}
@@ -25,7 +27,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/archcore}
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/archcore-dev}
 
 server:
   port: ${SERVER_PORT:8081}
@@ -38,11 +40,3 @@ management:
   endpoint:
     health:
       show-details: when_authorized
-
-archcore:
-  security:
-    jwe:
-      # JWE key locations - defaults to classpath for local development
-      # For Docker/K8s: override with external paths via environment variables
-      private-key-location: ${JWE_PRIVATE_KEY_LOCATION:classpath:keys/test-private.pem}
-      public-key-location: ${JWE_PUBLIC_KEY_LOCATION:classpath:keys/test-public.pem}

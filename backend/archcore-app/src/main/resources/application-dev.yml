@@ -1,0 +1,15 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+spring.security.oauth2.resourceserver.jwt.issuer-uri: http://localhost:8080/realms/archcore-dev
+
+archcore:
+  security:
+    jwe:
+      private-key-location: classpath:keys/test-private.pem
+      public-key-location: classpath:keys/test-public.pem
+      jwe-algorithm: RSA-OAEP-256
+      encryption-method: A256GCM
+      key-id: archcore-enc-key
