@@ -5,6 +5,11 @@
 saas-init.yml
 !saas-init.yml.example
 
+# Generated files (contain secrets or are dynamic)
+docker-compose.yml
+infrastructure/keycloak/templates/realm-dev.json
+infrastructure/keycloak/templates/realm-prod.json
+
 # Docker volumes
 postgres_data/
 keycloak_data/
