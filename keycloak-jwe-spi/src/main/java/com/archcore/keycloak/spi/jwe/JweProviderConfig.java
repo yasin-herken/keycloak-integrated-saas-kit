@@ -3,6 +3,7 @@ package com.archcore.keycloak.spi.jwe;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.keycloak.Config;
 
 @Data
 @NoArgsConstructor
@@ -27,7 +28,7 @@ public class JweProviderConfig {
     private String encryptionMethod;
     private String keyId;
 
-    static JweProviderConfig fromScope(org.keycloak.Config.Scope config) {
+    static JweProviderConfig fromScope(Config.Scope config) {
         if (config == null) {
             return new JweProviderConfig(
                     DEFAULT_JWKS_URL,

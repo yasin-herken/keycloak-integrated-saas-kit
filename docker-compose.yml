@@ -40,11 +40,6 @@ services:
       KC_HEALTH_ENABLED: "true"
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASS}
-      ARCHCORE_JWE_DEFAULT_JWKS_URL: ${ARCHCORE_JWE_DEFAULT_JWKS_URL}
-      ARCHCORE_JWE_CACHE_TTL_MS: ${ARCHCORE_JWE_CACHE_TTL_MS}
-      ARCHCORE_JWE_ALGORITHM: ${ARCHCORE_JWE_ALGORITHM}
-      ARCHCORE_JWE_ENCRYPTION_METHOD: ${ARCHCORE_JWE_ENCRYPTION_METHOD}
-      ARCHCORE_JWE_KEY_ID: ${ARCHCORE_JWE_KEY_ID}
       # Keycloak provider config properties (passed via env for SPI)
       archcore.jwe.default-jwks-url: ${ARCHCORE_JWE_DEFAULT_JWKS_URL}
       archcore.jwe.cache-ttl-ms: ${ARCHCORE_JWE_CACHE_TTL_MS}
@@ -54,7 +49,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./infrastructure/keycloak/import:/opt/keycloak/data/import:ro
+      - ./infrastructure/keycloak/templates:/opt/keycloak/data/import:ro
       - keycloak_data:/opt/keycloak/data
     command: ["start-dev", "--import-realm"]
 

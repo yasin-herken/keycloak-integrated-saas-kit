@@ -1,0 +1,30 @@
+# saas-init.yml - Master configuration file for the Enterprise SaaS Kit
+# This file is the single source of truth for all project configuration.
+# All nested YAML keys are automatically flattened to UPPERCASE environment variables
+# by deploy.sh (e.g., project.name -> PROJECT_NAME).
+#
+# Instructions:
+#   1. Copy this file: cp saas-init.yml.example saas-init.yml
+#   2. Edit saas-init.yml with your actual values
+#   3. Run: ./deploy.sh
+
+project:
+  name: myproject
+
+db:
+  name: keycloak
+  user: keycloak
+  password: keycloak-admin
+
+keycloak:
+  admin:
+    user: admin
+    pass: admin
+
+archcore:
+  jwe:
+    default-jwks-url: http://host.docker.internal:8081/.well-known/jwks.json
+    cache-ttl-ms: 300000
+    algorithm: RSA-OAEP-256
+    encryption-method: A256GCM
+    key-id: archcore-enc-key

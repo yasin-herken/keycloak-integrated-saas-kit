@@ -2,9 +2,8 @@
 .env
 .env.*
 !.env.example
-
-# Generated realm configs (run generate-realm-configs.sh to recreate)
-infrastructure/keycloak/import/
+saas-init.yml
+!saas-init.yml.example
 
 # Docker volumes
 postgres_data/
