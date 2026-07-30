@@ -50,3 +50,8 @@
   1. **Task Summary:** A brief recap of what was implemented or modified.
   2. **Applied Patterns:** Explicit listing of any software design patterns (e.g., Strategy, Factory, Repository, Facade, Builder) utilized during the implementation.
   3. **Architectural Rationale:** A clear, engineering-focused explanation of *why* those specific patterns and approaches were chosen. The agent must justify how the chosen implementation aligns with Clean Code principles, system performance, and the overarching Modular Monolith architecture.
+
+## 9. Documentation Maintenance (README.md)
+* **Living Documentation:** The project's root `README.md` file must always reflect the current state of the application.
+* **Approval-Triggered Updates:** Upon the completion of any task, and **strictly after receiving explicit approval from the user**, the agent must automatically update the `README.md` file.
+* **Scope of Update:** The update must accurately document any newly added features, changes to the architectural structure, new environment variables, or modifications to setup/run instructions introduced during the task.

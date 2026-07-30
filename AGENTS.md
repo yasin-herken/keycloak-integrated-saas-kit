@@ -7,6 +7,18 @@ These agents are designed to handle specific domains of the software development
 ## 0. Global Directive: `.opencode/RULES.md`
 **CRITICAL:** All agents described in this document operate under the strict jurisdiction of the `.opencode/RULES.md` file. This global ruleset acts as the ultimate constitution for architectural boundaries, security protocols, clean code standards, and execution limits. **No agent is permitted to override, bypass, or ignore the constraints defined in `.opencode/RULES.md`.**
 
+## 0.1 Architecture Context: `.opencode/ARCHITECTURE.md`
+**MANDATORY:** Every agent MUST read `.opencode/ARCHITECTURE.md` at the start of each session. This file contains:
+- Quick reference summary (stack, patterns, current state)
+- Key rules and constraints
+
+**Detailed docs are split for token optimization:**
+- `.opencode/arch/auth.md` — Authentication & JWE SPI details
+- `.opencode/arch/infra.md` — Docker & infrastructure
+- `.opencode/arch/config.md` — Configuration flow & templating
+
+**Why this matters:** A new session has no memory of past work. ARCHITECTURE.md is the bridge. Before making ANY change, agents must understand what exists and why it was built that way. After completing a task, agents MUST update ARCHITECTURE.md to reflect new decisions, components, or patterns.
+
 ---
 
 ## 1. Specification Agent (`spec-agent`)
@@ -64,9 +76,11 @@ The gatekeeper that ensures the generated code and infrastructure adhere to the 
 
 ## Execution Workflow
 
-1.  **Requirement Input:** User provides a natural language requirement to the `spec-agent`.
-2.  **Specification Update:** `spec-agent` translates this into a formal `.spec` update, validating against `.opencode/RULES.md`.
-3.  **Code Synthesis:** `codegen-agent` and `infra-agent` read the new spec and generate the corresponding application code and infrastructure files, utilizing MCP tools for accuracy.
-4.  **Logging & Rationale:** `codegen-agent` outputs its execution log detailing applied patterns.
-5.  **Security Review:** `security-agent` reviews the output against established enterprise constraints and VCS rules.
-6.  **Finalization:** Approved code is auto-added to Git and ready for manual review or automated deployment.
+1.  **Context Loading:** Agent reads `.opencode/ARCHITECTURE.md` to understand current project state.
+2.  **Requirement Input:** User provides a natural language requirement to the `spec-agent`.
+3.  **Specification Update:** `spec-agent` translates this into a formal `.spec` update, validating against `.opencode/RULES.md`.
+4.  **Code Synthesis:** `codegen-agent` and `infra-agent` read the new spec and generate the corresponding application code and infrastructure files, utilizing MCP tools for accuracy.
+5.  **Logging & Rationale:** `codegen-agent` outputs its execution log detailing applied patterns.
+6.  **Security Review:** `security-agent` reviews the output against established enterprise constraints and VCS rules.
+7.  **Architecture Update:** Agent updates `.opencode/ARCHITECTURE.md` to reflect new decisions, components, or patterns added.
+8.  **Finalization:** Approved code is auto-added to Git and ready for manual review or automated deployment.

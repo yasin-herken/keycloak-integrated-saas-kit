@@ -16,6 +16,10 @@ keycloak_data/
 *.swp
 *.swo
 
+# Agent context (local only)
+.opencode/ARCHITECTURE.md
+.opencode/arch/
+
 # OS
 .DS_Store
 Thumbs.db
