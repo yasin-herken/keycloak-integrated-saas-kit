@@ -4,8 +4,9 @@
 - **Stack:** Java 25, Spring Boot 4, Keycloak 26+, PostgreSQL 18
 - **Pattern:** Modular Monolith, 12-Factor App, Stateless REST API
 - **Auth:** Keycloak handles ALL auth. JWE SPI for token encryption. Backend = Resource Server only.
-- **Config:** `saas-init.yml` → `deploy.sh` → `.env` → docker compose
+- **Config:** `saas-init.yml` → `deploy.sh` → `.env` + `docker-compose.yml` → docker compose
 - **Templates:** `.template` files in `infrastructure/` auto-discovered by `deploy.sh`
+- **Features:** Optional features controlled via `features` section in `saas-init.yml`
 
 ## Key Rules
 - No custom auth logic in backend
@@ -18,6 +19,9 @@
 - ✅ Keycloak + PostgreSQL Docker setup
 - ✅ JWE SPI for token encryption
 - ✅ Templating engine (deploy.sh)
+- ✅ Feature flags system (forgotPassword, googleLogin, smtp)
+- ✅ Dynamic docker-compose.yml generation
+- ✅ Realm JSON post-processing with jq
 - ⏳ Backend scaffold (Spring Boot 4 + Java 25)
 
 ## Detailed Documentation

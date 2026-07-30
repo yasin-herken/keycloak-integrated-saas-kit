@@ -9,7 +9,15 @@
 #   3. Run: ./deploy.sh
 
 project:
-  name: myproject
+  name: archcore
+
+features:
+  forgotPassword:
+    enabled: true
+  googleLogin:
+    enabled: true
+  smtp:
+    enabled: true
 
 db:
   name: keycloak
@@ -20,6 +28,18 @@ keycloak:
   admin:
     user: admin
     pass: admin
+  smtp:
+    host: smtp.gmail.com
+    port: 587
+    user: your-email@gmail.com
+    password: your-app-password
+    from: noreply@yourdomain.com
+  google:
+    clientId: your-google-client-id.apps.googleusercontent.com
+    clientSecret: your-google-client-secret
+
+frontend:
+  url: http://localhost:3000
 
 archcore:
   jwe:

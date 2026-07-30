@@ -34,6 +34,11 @@ command -v envsubst >/dev/null 2>&1 || {
   exit 1
 }
 
+command -v jq >/dev/null 2>&1 || {
+  echo "ERROR: 'jq' is not installed. Install it with: brew install jq" >&2
+  exit 1
+}
+
 # -----------------------------------------------------------------------------
 # Verify config file exists
 # -----------------------------------------------------------------------------
@@ -99,12 +104,146 @@ for search_dir in "${SEARCH_DIRS[@]}"; do
   while IFS= read -r template_file; do
     output_file="${template_file%.template}"
     envsubst < "$template_file" > "$output_file"
+
+    # Post-process Keycloak realm JSON files for feature flags
+    if [[ "$output_file" == *realm*.json ]]; then
+      # Apply forgot password feature flag
+      if [[ "${FEATURES_FORGOTPASSWORD_ENABLED:-true}" == "false" ]]; then
+        jq '.resetPasswordAllowed = false' "$output_file" > "${output_file}.tmp" && mv "${output_file}.tmp" "$output_file"
+        echo "     -> Forgot password: DISABLED"
+      else
+        echo "     -> Forgot password: ENABLED"
+      fi
+
+      # Apply google login feature flag
+      if [[ "${FEATURES_GOOGLELOGIN_ENABLED:-true}" == "false" ]]; then
+        jq 'del(.identityProviders) | del(.identityProviderMappers)' "$output_file" > "${output_file}.tmp" && mv "${output_file}.tmp" "$output_file"
+        echo "     -> Google login: DISABLED"
+      else
+        echo "     -> Google login: ENABLED"
+      fi
+
+      # Apply smtp feature flag
+      if [[ "${FEATURES_SMTP_ENABLED:-true}" == "false" ]]; then
+        jq '.smtpServer = {}' "$output_file" > "${output_file}.tmp" && mv "${output_file}.tmp" "$output_file"
+        echo "     -> SMTP: DISABLED"
+      else
+        echo "     -> SMTP: ENABLED"
+      fi
+    fi
+
     echo "   Generated: $output_file"
     GENERATED_COUNT=$((GENERATED_COUNT + 1))
   done < "$TEMPLATES_FILE"
 
   rm -f "$TEMPLATES_FILE"
 done
+
+# -----------------------------------------------------------------------------
+# Generate docker-compose.yml dynamically based on feature flags
+# -----------------------------------------------------------------------------
+echo ">> Generating docker-compose.yml with feature flags..."
+
+DOCKER_COMPOSE_FILE="docker-compose.yml"
+
+# Start building the environment section
+ENV_SECTION=""
+
+# Core Keycloak env vars (always included)
+ENV_SECTION="${ENV_SECTION}      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/\${DB_NAME}
+      KC_DB_USERNAME: \${DB_USER}
+      KC_DB_PASSWORD: \${DB_PASSWORD}
+      KC_HOSTNAME_STRICT: \"false\"
+      KC_HTTP_HOST: \"0.0.0.0\"
+      KC_PORT: 8080
+      KC_HTTP_PORT: 8080
+      KC_HEALTH_ENABLED: \"true\"
+      KC_BOOTSTRAP_ADMIN_USERNAME: \${KEYCLOAK_ADMIN_USER}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: \${KEYCLOAK_ADMIN_PASS}
+"
+
+# Frontend URL (always included)
+ENV_SECTION="${ENV_SECTION}      # Frontend URL for client configuration
+      FRONTEND_URL: \${FRONTEND_URL}
+"
+
+# JWE SPI config (always included)
+ENV_SECTION="${ENV_SECTION}      # Keycloak provider config properties (passed via env for SPI)
+      archcore.jwe.default-jwks-url: \${ARCHCORE_JWE_DEFAULT_JWKS_URL}
+      archcore.jwe.cache-ttl-ms: \${ARCHCORE_JWE_CACHE_TTL_MS}
+      archcore.jwe.algorithm: \${ARCHCORE_JWE_ALGORITHM}
+      archcore.jwe.encryption-method: \${ARCHCORE_JWE_ENCRYPTION_METHOD}
+      archcore.jwe.key-id: \${ARCHCORE_JWE_KEY_ID}
+"
+
+# SMTP (conditional)
+if [[ "${FEATURES_SMTP_ENABLED:-true}" == "true" ]]; then
+  ENV_SECTION="${ENV_SECTION}      # SMTP Configuration for Forgot Password emails
+      KEYCLOAK_SMTP_HOST: \${KEYCLOAK_SMTP_HOST}
+      KEYCLOAK_SMTP_PORT: \${KEYCLOAK_SMTP_PORT}
+      KEYCLOAK_SMTP_USER: \${KEYCLOAK_SMTP_USER}
+      KEYCLOAK_SMTP_PASSWORD: \${KEYCLOAK_SMTP_PASSWORD}
+      KEYCLOAK_SMTP_FROM: \${KEYCLOAK_SMTP_FROM}
+"
+fi
+
+# Google Login (conditional)
+if [[ "${FEATURES_GOOGLELOGIN_ENABLED:-true}" == "true" ]]; then
+  ENV_SECTION="${ENV_SECTION}      # Google Social Login
+      KEYCLOAK_GOOGLE_CLIENTID: \${KEYCLOAK_GOOGLE_CLIENTID}
+      KEYCLOAK_GOOGLE_CLIENTSECRET: \${KEYCLOAK_GOOGLE_CLIENTSECRET}
+"
+fi
+
+# Generate the complete docker-compose.yml
+cat > "$DOCKER_COMPOSE_FILE" << EOF
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: \${PROJECT_NAME}-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: \${DB_NAME}
+      POSTGRES_USER: \${DB_USER}
+      POSTGRES_PASSWORD: \${DB_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \${DB_USER} -d \${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    build:
+      context: .
+      dockerfile: infrastructure/keycloak/Dockerfile
+    container_name: \${PROJECT_NAME}-keycloak
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+${ENV_SECTION}    ports:
+      - "8080:8080"
+    volumes:
+      - ./infrastructure/keycloak/templates:/opt/keycloak/data/import:ro
+      - keycloak_data:/opt/keycloak/data
+    command: ["start-dev", "--import-realm"]
+
+volumes:
+  postgres_data:
+  keycloak_data:
+EOF
+
+echo "   Generated: $DOCKER_COMPOSE_FILE"
+echo "     -> SMTP env vars: $(if [[ "${FEATURES_SMTP_ENABLED:-true}" == "true" ]]; then echo "INCLUDED"; else echo "EXCLUDED"; fi)"
+echo "     -> Google env vars: $(if [[ "${FEATURES_GOOGLELOGIN_ENABLED:-true}" == "true" ]]; then echo "INCLUDED"; else echo "EXCLUDED"; fi)"
 
 # -----------------------------------------------------------------------------
 # Summary

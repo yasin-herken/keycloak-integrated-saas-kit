@@ -17,7 +17,17 @@
   "maxDeltaTimeSeconds": 43200,
   "failureFactor": 5,
   "passwordPolicy": "length(10) and upperCase(1) and lowerCase(1) and digits(1) and specialChars(1) and notUsername(undefined)",
-  "smtpServer": {},
+  "smtpServer": {
+    "host": "${KEYCLOAK_SMTP_HOST}",
+    "port": "${KEYCLOAK_SMTP_PORT}",
+    "from": "${KEYCLOAK_SMTP_FROM}",
+    "auth": {
+      "username": "${KEYCLOAK_SMTP_USER}",
+      "password": "${KEYCLOAK_SMTP_PASSWORD}"
+    },
+    "starttls": "true",
+    "ssl": "false"
+  },
   "accessTokenLifespan": 300,
   "ssoSessionIdleTimeout": 1800,
   "ssoSessionMaxLifespan": 36000,
@@ -36,6 +46,18 @@
   "defaultRoles": ["user"],
   "clients": [
     {
+      "clientId": "${PROJECT_NAME}-frontend",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["${FRONTEND_URL}/*"],
+      "webOrigins": ["${FRONTEND_URL}"]
+    },
+    {
       "clientId": "${PROJECT_NAME}-client",
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
@@ -48,6 +70,53 @@
       "protocol": "openid-connect",
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false
+    }
+  ],
+  "identityProviders": [
+    {
+      "alias": "google",
+      "providerId": "google",
+      "enabled": true,
+      "trustEmail": true,
+      "storeToken": false,
+      "config": {
+        "clientId": "${KEYCLOAK_GOOGLE_CLIENTID}",
+        "clientSecret": "${KEYCLOAK_GOOGLE_CLIENTSECRET}",
+        "defaultScope": "openid email profile",
+        "syncMode": "IMPORT"
+      }
+    }
+  ],
+  "identityProviderMappers": [
+    {
+      "identityProviderAlias": "google",
+      "name": "email",
+      "identityProviderMapper": "hardcoded-user-attribute-idp-mapper",
+      "config": {
+        "attribute.name": "email",
+        "user.attribute": "email",
+        "syncMode": "INHERIT"
+      }
+    },
+    {
+      "identityProviderAlias": "google",
+      "name": "first-name",
+      "identityProviderMapper": "hardcoded-user-attribute-idp-mapper",
+      "config": {
+        "attribute.name": "firstName",
+        "user.attribute": "firstName",
+        "syncMode": "INHERIT"
+      }
+    },
+    {
+      "identityProviderAlias": "google",
+      "name": "last-name",
+      "identityProviderMapper": "hardcoded-user-attribute-idp-mapper",
+      "config": {
+        "attribute.name": "lastName",
+        "user.attribute": "lastName",
+        "syncMode": "INHERIT"
+      }
     }
   ],
   "users": []

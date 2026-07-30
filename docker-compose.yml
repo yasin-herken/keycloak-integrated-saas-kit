@@ -40,12 +40,23 @@ services:
       KC_HEALTH_ENABLED: "true"
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASS}
+      # Frontend URL for client configuration
+      FRONTEND_URL: ${FRONTEND_URL}
       # Keycloak provider config properties (passed via env for SPI)
       archcore.jwe.default-jwks-url: ${ARCHCORE_JWE_DEFAULT_JWKS_URL}
       archcore.jwe.cache-ttl-ms: ${ARCHCORE_JWE_CACHE_TTL_MS}
       archcore.jwe.algorithm: ${ARCHCORE_JWE_ALGORITHM}
       archcore.jwe.encryption-method: ${ARCHCORE_JWE_ENCRYPTION_METHOD}
       archcore.jwe.key-id: ${ARCHCORE_JWE_KEY_ID}
+      # SMTP Configuration for Forgot Password emails
+      KEYCLOAK_SMTP_HOST: ${KEYCLOAK_SMTP_HOST}
+      KEYCLOAK_SMTP_PORT: ${KEYCLOAK_SMTP_PORT}
+      KEYCLOAK_SMTP_USER: ${KEYCLOAK_SMTP_USER}
+      KEYCLOAK_SMTP_PASSWORD: ${KEYCLOAK_SMTP_PASSWORD}
+      KEYCLOAK_SMTP_FROM: ${KEYCLOAK_SMTP_FROM}
+      # Google Social Login
+      KEYCLOAK_GOOGLE_CLIENTID: ${KEYCLOAK_GOOGLE_CLIENTID}
+      KEYCLOAK_GOOGLE_CLIENTSECRET: ${KEYCLOAK_GOOGLE_CLIENTSECRET}
     ports:
       - "8080:8080"
     volumes:
