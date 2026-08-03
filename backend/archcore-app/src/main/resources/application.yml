@@ -33,10 +33,42 @@ server:
   port: ${SERVER_PORT:8081}
 
 management:
+  server:
+    port: 9090
   endpoints:
     web:
+      base-path: /manage
       exposure:
         include: health,info
   endpoint:
     health:
       show-details: when_authorized
+    info:
+      enabled: true
+  info:
+    env:
+      enabled: false
+
+archcore:
+  security:
+    allowed-origins: https://localhost:3000
+
+bucket4j:
+  enabled: true
+  filters:
+    - cache-name: rate-limit-buckets
+      url: /api/v1/auth/.*
+      rate-limits:
+        - bandwidths:
+            - capacity: 20
+              time: 1
+              unit: minutes
+              refill-speed: interval
+    - cache-name: rate-limit-buckets
+      url: /api/v1/.*
+      rate-limits:
+        - bandwidths:
+            - capacity: 300
+              time: 1
+              unit: minutes
+              refill-speed: interval

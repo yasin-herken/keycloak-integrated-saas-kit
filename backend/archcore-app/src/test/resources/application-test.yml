@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: archcore-app-test
+  profiles:
+    active: test
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/keycloak
+    username: keycloak
+    password: gizlisifre
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+
+  liquibase:
+    enabled: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/test
+
+server:
+  port: 0
+
+management:
+  server:
+    port: 0
+  endpoints:
+    web:
+      base-path: /manage
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+    info:
+      enabled: false
+  info:
+    env:
+      enabled: false
+
+archcore:
+  security:
+    allowed-origins: https://localhost:3000
+
+bucket4j:
+  enabled: false
+
+logging:
+  level:
+    org.springframework.security: DEBUG
