@@ -40,9 +40,7 @@ bucket4j:
             - capacity: 20
               time: 1
               unit: minutes
-              refill-speed: 20
-              refill-time: 1
-              refill-unit: minutes
+              refill-speed: interval
     - cache-name: rate-limit-buckets
       url: /api/v1/.*
       rate-limits:
@@ -50,6 +48,4 @@ bucket4j:
             - capacity: 300
               time: 1
               unit: minutes
-              refill-speed: 300
-              refill-time: 1
-              refill-unit: minutes
+              refill-speed: interval
