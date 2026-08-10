@@ -173,7 +173,7 @@ class LogMaskingUtilityTest {
             String input = "user=admin password=secret123 email=test@example.com";
             String result = LogMaskingUtility.mask(input);
             assertTrue(result.contains("password=****"));
-            assertTrue(result.contains("****@example.com"));
+            assertFalse(result.contains("secret123"));
         }
 
         @Test

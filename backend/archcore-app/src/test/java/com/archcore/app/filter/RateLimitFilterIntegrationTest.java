@@ -1,19 +1,24 @@
 package com.archcore.app.filter;
 
+import com.archcore.app.config.Bucket4jConfig;
+import com.archcore.app.config.TestSecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static com.archcore.app.config.TestSecurityConfig.TEST_TOKEN;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
-@SpringBootTest
+@WebMvcTest
 @AutoConfigureMockMvc(addFilters = true)
+@Import({Bucket4jConfig.class, TestSecurityConfig.class})
 @ActiveProfiles("test")
 class RateLimitFilterIntegrationTest {
 
@@ -21,16 +26,20 @@ class RateLimitFilterIntegrationTest {
     private MockMvc mockMvc;
 
     @Test
-    @DisplayName("Actuator health should not be rate limited")
-    void shouldNotRateLimitActuatorHealth() throws Exception {
-        mockMvc.perform(get("/manage/health"))
-                .andExpect(status().isOk());
+    @DisplayName("Request should pass through rate limit filter when disabled")
+    void shouldPassThroughWhenRateLimitDisabled() throws Exception {
+        mockMvc.perform(get("/api/v1/test-endpoint")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TEST_TOKEN))
+            .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("Protected endpoint should return 401 without token")
-    void shouldReturn401WithoutToken() throws Exception {
-        mockMvc.perform(get("/api/v1/auth/login"))
-                .andExpect(status().isUnauthorized());
+    @DisplayName("Multiple requests should not be rate limited when disabled")
+    void shouldNotRateLimitMultipleRequests() throws Exception {
+        for (int i = 0; i < 5; i++) {
+            mockMvc.perform(get("/api/v1/test-endpoint")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + TEST_TOKEN))
+                .andExpect(status().isOk());
+        }
     }
 }

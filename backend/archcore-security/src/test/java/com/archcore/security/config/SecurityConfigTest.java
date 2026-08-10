@@ -22,7 +22,8 @@ class SecurityConfigTest {
         JweProperties jweProperties = new JweProperties();
         JwtDecoderConfig jwtDecoderConfig = new JwtDecoderConfig(resourceLoader, jweProperties, "http://localhost:8080/realms/archcore");
 
-        SecurityConfig securityConfig = new SecurityConfig();
+        SecurityProperties securityProperties = new SecurityProperties();
+        SecurityConfig securityConfig = new SecurityConfig(securityProperties);
         assertNotNull(securityConfig);
         assertNotNull(jwtDecoderConfig.archcorePublicKey());
     }

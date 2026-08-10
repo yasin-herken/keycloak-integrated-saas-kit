@@ -1,8 +1,6 @@
 spring:
   application:
     name: archcore-app-test
-  profiles:
-    active: test
 
   datasource:
     url: jdbc:postgresql://localhost:5433/keycloak

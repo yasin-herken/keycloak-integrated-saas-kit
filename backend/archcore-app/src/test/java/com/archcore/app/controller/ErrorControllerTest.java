@@ -1,48 +1,29 @@
 package com.archcore.app.controller;
 
 import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
 
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ErrorController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 class ErrorControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockitoBean
-    private HttpServletRequest mockRequest;
-
-    @BeforeEach
-    void setUp() {
-        when(mockRequest.getAttribute(RequestDispatcher.ERROR_STATUS_CODE)).thenReturn(404);
-        when(mockRequest.getAttribute(RequestDispatcher.ERROR_REQUEST_URI)).thenReturn("/api/v1/nonexistent");
-        when(mockRequest.getAttribute(RequestDispatcher.ERROR_EXCEPTION)).thenReturn(null);
-        when(mockRequest.getRequestURI()).thenReturn("/error");
-    }
-
     @Test
     @DisplayName("/error - should return 404 with standardized JSON response")
     void shouldHandle404Error() throws Exception {
-        when(mockRequest.getAttribute(RequestDispatcher.ERROR_STATUS_CODE)).thenReturn(404);
-
         mockMvc.perform(get("/error")
                         .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 404)
                         .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/v1/nonexistent"))
