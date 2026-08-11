@@ -64,3 +64,24 @@ archcore:
         capacity: 300
         refill-tokens: 300
         refill-duration-seconds: 60
+  billing:
+    provider: stripe
+    webhook-secret: ${BILLING_WEBHOOK_SECRET:}
+  audit:
+    enabled: true
+    async: true
+  async:
+    enabled: true
+    executors:
+      - name: auditLog
+        core-pool-size: 2
+        max-pool-size: 5
+        queue-capacity: 100
+        thread-name-prefix: audit-log-
+        await-termination-seconds: 30
+      - name: default
+        core-pool-size: 2
+        max-pool-size: 10
+        queue-capacity: 200
+        thread-name-prefix: async-
+        await-termination-seconds: 30
