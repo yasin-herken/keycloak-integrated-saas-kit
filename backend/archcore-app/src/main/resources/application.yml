@@ -33,10 +33,34 @@ server:
   port: ${SERVER_PORT:8081}
 
 management:
+  server:
+    port: 9090
   endpoints:
     web:
+      base-path: /manage
       exposure:
         include: health,info
   endpoint:
     health:
       show-details: when_authorized
+    info:
+      enabled: true
+  info:
+    env:
+      enabled: false
+
+archcore:
+  security:
+    allowed-origins: https://localhost:3000
+  rate-limit:
+    enabled: true
+    key-strategy: COMPOSITE
+    filters:
+      - url: /api/v1/auth/.*
+        capacity: 20
+        refill-tokens: 20
+        refill-duration-seconds: 60
+      - url: /api/v1/.*
+        capacity: 300
+        refill-tokens: 300
+        refill-duration-seconds: 60

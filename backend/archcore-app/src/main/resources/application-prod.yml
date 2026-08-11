@@ -5,11 +5,38 @@ spring:
 
 spring.security.oauth2.resourceserver.jwt.issuer-uri: ${KEYCLOAK_ISSUER_URI}
 
+management:
+  endpoints:
+    web:
+      base-path: /manage
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+    info:
+      enabled: true
+  info:
+    env:
+      enabled: false
+
 archcore:
   security:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://localhost:3000}
     jwe:
       private-key-location: ${JWE_PRIVATE_KEY_PATH}
       public-key-location: ${JWE_PUBLIC_KEY_PATH}
       jwe-algorithm: ${JWE_ALGORITHM:RSA-OAEP-256}
       encryption-method: ${JWE_ENCRYPTION_METHOD:A256GCM}
       key-id: ${JWE_KEY_ID:archcore-enc-key}
+  rate-limit:
+    enabled: true
+    filters:
+      - url: /api/v1/auth/.*
+        capacity: 20
+        refill-tokens: 20
+        refill-duration-seconds: 60
+      - url: /api/v1/.*
+        capacity: 300
+        refill-tokens: 300
+        refill-duration-seconds: 60
