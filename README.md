@@ -1,20 +1,50 @@
-# Keycloak Integrated SaaS Kit
+# ArchCore Enterprise SaaS Kit
 
-Ready-to-use development environment that boots Keycloak and PostgreSQL infrastructure with a single command.
+> A production-ready Java SaaS boilerplate with JWE encryption, zero-touch infrastructure, built-in billing, rate limiting, and audit logs. From clone to running backend in 5 minutes.
+
+---
+
+## Features
+
+| Feature | Description |
+|---------|-------------|
+| **JWE Token Encryption** | End-to-end encrypted JWT tokens via custom Keycloak SPI. Tokens are encrypted at the IdP and decrypted locally by the Resource Server — no network calls to Keycloak for validation. |
+| **Zero-Touch Infrastructure** | Single `saas-init.yml` config file drives Docker, Keycloak realms, feature flags, and environment variables via `deploy.sh`. |
+| **Built-in Billing & Subscriptions** | Stripe-ready subscription management with plan tiers, trial support, and webhook handling. |
+| **Dynamic Rate Limiting** | Annotation-based rate limiting (`@RateLimit`) with per-user, per-IP, or per-endpoint scoping via Bucket4j. |
+| **Audit Logging** | Declarative activity tracking (`@LogActivity`) with AOP-powered automatic persistence. |
+| **Profile Management** | User profile CRUD with automatic Keycloak sync and account lifecycle (activate/deactivate). |
+| **Global Exception Handling** | Consistent error responses across all endpoints with validation support. |
+| **Modular Monolith** | Clean separation: `core` (business logic) vs. `app` (HTTP layer) vs. `security` (auth infrastructure). |
+
+---
+
+## Prerequisites
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+| **Docker** | 24+ | Container runtime for Keycloak & PostgreSQL |
+| **Java** | 25 (Temurin) | Backend compilation and execution |
+| **Maven** | 3.9+ | Build tool (wrapper included) |
+| **yq** | 4.x | YAML processing in deploy.sh |
+| **envsubst** | — | Environment variable substitution for templates |
+| **jq** | 1.7+ | JSON post-processing for Keycloak realm configs |
+
+---
 
 ## Quick Start
 
-### 1. Create the configuration file
+### Step 1: Configure Your Project
 
 ```bash
 cp saas-init.yml.example saas-init.yml
 ```
 
-### 2. Edit `saas-init.yml`
+Edit `saas-init.yml` with your project settings:
 
 ```yaml
 project:
-  name: archcore  # or your project name (e.g., myproject)
+  name: myproject
 
 features:
   forgotPassword:
@@ -27,12 +57,12 @@ features:
 db:
   name: keycloak
   user: keycloak
-  password: yourPassword
+  password: changeMe123!
 
 keycloak:
   admin:
     user: admin
-    pass: yourPassword
+    pass: changeMe123!
   smtp:
     host: smtp.gmail.com
     port: 587
@@ -47,177 +77,195 @@ frontend:
   url: http://localhost:3000
 ```
 
-### 3. Run the deployment script
+### Step 2: Deploy Infrastructure
 
 ```bash
+chmod +x deploy.sh
 ./deploy.sh
 ```
 
 This generates:
-- `.env` file for docker-compose
-- `docker-compose.yml` with feature-specific environment variables
-- Keycloak realm JSON files (`realm-dev.json`, `realm-prod.json`)
+- `.env` — Docker environment variables
+- `docker-compose.yml` — Container definitions
+- `realm-dev.json` / `realm-prod.json` — Keycloak realm configurations
 
-### 4. Start the containers
+### Step 3: Start Services
 
 ```bash
 docker compose up -d
 ```
 
-### 5. Verify it's running
+### Step 4: Run the Backend
 
 ```bash
-docker ps
+cd backend
+./mvnw spring-boot:run -pl archcore-app
 ```
 
-You should see `archcore-postgres` and `archcore-keycloak` containers in running state.
+The API is now live at `http://localhost:8080`.
 
-## Feature Flags
+### Step 5: Verify
 
-Control optional features via `saas-init.yml`:
+```bash
+# Public health check (no auth required)
+curl http://localhost:8080/api/v1/public/ping
 
-| Feature | Description | Env Vars Required |
-|---------|-------------|-------------------|
-| `forgotPassword` | Shows "Forgot Password" link on login | SMTP config |
-| `googleLogin` | Shows "Login with Google" button | Google OAuth config |
-| `smtp` | Configures email server for notifications | SMTP config |
-
-### Examples
-
-**Full features (Google + SMTP + Forgot Password):**
-```yaml
-features:
-  forgotPassword:
-    enabled: true
-  googleLogin:
-    enabled: true
-  smtp:
-    enabled: true
+# Expected response:
+# {"status":"UP","timestamp":"2026-08-11T...","service":"ArchCore SaaS Kit"}
 ```
 
-**Only password login (no Google, no email):**
-```yaml
-features:
-  forgotPassword:
-    enabled: false
-  googleLogin:
-    enabled: false
-  smtp:
-    enabled: false
-```
+---
 
-**Password + Forgot Password (requires SMTP):**
-```yaml
-features:
-  forgotPassword:
-    enabled: true
-  googleLogin:
-    enabled: false
-  smtp:
-    enabled: true
-```
-
-**Password + Google (no email notifications):**
-```yaml
-features:
-  forgotPassword:
-    enabled: false
-  googleLogin:
-    enabled: true
-  smtp:
-    enabled: false
-```
-
-## Access
-
-| Service | URL |
-|---------|-----|
-| Keycloak Admin Panel | http://localhost:8080 |
-| PostgreSQL | localhost:5433 |
-
-**Keycloak login:** Use the `KEYCLOAK_ADMIN_USER` and `KEYCLOAK_ADMIN_PASS` defined in your `saas-init.yml` file.
-
-## Generated Realms
-
-With `PROJECT_NAME=archcore` (or `myproject` if you used that):
-
-| Realm | Purpose |
-|-------|---------|
-| `archcore-dev` | Development environment (open registration, SSL not required) |
-| `archcore` | Production environment (registration closed, SSL required) |
-
-## File Structure
+## Architecture
 
 ```
-├── saas-init.yml                          # Master config (single source of truth)
-├── saas-init.yml.example                  # Template config file
-├── deploy.sh                              # Deployment script (generates all configs)
-├── .env                                   # Generated env vars (not committed)
-├── docker-compose.yml                     # Generated container definitions (not committed)
-├── infrastructure/keycloak/
-│   ├── Dockerfile                         # Custom Keycloak image with JWE SPI
-│   ├── templates/
-│   │   ├── realm-dev.json.template        # Dev realm template
-│   │   ├── realm-prod.json.template       # Prod realm template
-│   │   ├── realm-dev.json                 # Generated (not committed)
-│   │   └── realm-prod.json                # Generated (not committed)
-│   └── import/
-│       └── (legacy import files)
+keycloak-integrated-saas-kit/
+├── saas-init.yml                  # Single source of truth for all config
+├── deploy.sh                      # Config generation engine
+├── docker-compose.yml             # Generated container definitions
+├── backend/
+│   ├── pom.xml                    # Parent POM (multi-module)
+│   ├── archcore-core/             # Business logic layer
+│   │   └── src/main/java/com/archcore/core/
+│   │       ├── domain/            # Entities (Subscription, Plan, UserProfile, AuditLog)
+│   │       ├── repository/        # Spring Data JPA repositories
+│   │       └── service/           # Business services (BillingService, UserProfileService)
+│   ├── archcore-security/         # Authentication infrastructure
+│   │   └── src/main/java/com/archcore/security/
+│   │       ├── config/            # SecurityConfig, JwtDecoderConfig, JweProperties
+│   │       └── converter/         # KeycloakJwtAuthenticationConverter
+│   └── archcore-app/              # Application entry point (HTTP layer)
+│       └── src/main/java/com/archcore/app/
+│           ├── controller/        # REST controllers (Sample, User, Admin, Billing)
+│           ├── ratelimit/         # @RateLimit annotation + Bucket4j filter
+│           ├── audit/             # @LogActivity annotation + AOP aspect
+│           ├── exception/         # GlobalExceptionHandler + ErrorResponse
+│           ├── dto/               # Request/Response records
+│           └── filter/            # RateLimitFilter
+├── keycloak-jwe-spi/              # Custom Keycloak SPI for JWE token encryption
+│   └── src/main/java/com/archcore/keycloak/spi/jwe/
+│       ├── JweAccessTokenResponseMapper.java
+│       └── JwksClient.java
+└── infrastructure/
+    └── keycloak/
+        ├── Dockerfile             # Custom Keycloak image with JWE SPI
+        └── templates/             # Realm JSON templates (dev/prod)
 ```
 
-## How It Works
+### Core vs. Domain Isolation
+
+| Layer | Module | Responsibility |
+|-------|--------|----------------|
+| **Core** | `archcore-core` | Entities, repositories, business services. No HTTP, no annotations. |
+| **Security** | `archcore-security` | JWT/JWE validation, Keycloak integration, security filter chain. |
+| **App (Domain)** | `archcore-app` | REST controllers, DTOs, AOP aspects, filters. Depends on core + security. |
+
+**Rule:** Domain controllers use core services. Core never imports app or security.
+
+---
+
+## API Authentication Flow
 
 ```
-saas-init.yml  →  deploy.sh  →  .env  →  docker compose
-                     ↓
-               .template → .json (Keycloak import)
-                     ↓
-               docker-compose.yml (dynamic generation)
+┌──────────────┐         ┌──────────────┐         ┌──────────────┐
+│    Client     │         │   Keycloak   │         │  Backend API │
+│              │         │  (IdP + JWE) │         │  (Resource   │
+│              │         │              │         │   Server)    │
+└──────┬───────┘         └──────┬───────┘         └──────┬───────┘
+       │                        │                        │
+       │  1. POST /auth/token   │                        │
+       │  (username + password) │                        │
+       │───────────────────────>│                        │
+       │                        │                        │
+       │  2. JWE-encrypted JWT  │                        │
+       │  (sub, email, roles)   │                        │
+       │<───────────────────────│                        │
+       │                        │                        │
+       │  3. GET /api/v1/users/me                       │
+       │  Authorization: Bearer <JWE>                   │
+       │───────────────────────────────────────────────>│
+       │                        │                        │
+       │                        │  4. Decrypt JWE locally│
+       │                        │  using RSA private key │
+       │                        │  (no network call)     │
+       │                        │                        │
+       │  5. 200 OK + response  │                        │
+       │<───────────────────────────────────────────────│
 ```
 
-1. `deploy.sh` parses `saas-init.yml` and flattens keys to env vars
-2. `.template` files are processed with `envsubst`
-3. `jq` post-processes realm JSON based on feature flags
-4. `docker-compose.yml` is generated with only required env vars
+**Key Point:** The backend validates tokens **locally** using the RSA key pair generated during `deploy.sh`. No network call to Keycloak is needed for token validation — this is what makes the JWE SPI approach both secure and fast.
+
+---
+
+## How to Extend the Domain
+
+Creating a new endpoint takes ~5 lines:
+
+```java
+@RestController
+@RequestMapping("/api/v1/my-domain")
+public class MyDomainController {
+
+    @GetMapping("/data")
+    @RateLimit(requests = 20, periodSeconds = 60, scope = RateLimit.RateLimitScope.USER)
+    @LogActivity(description = "Fetched domain data")
+    public ResponseEntity<Map<String, Object>> getData(@AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(Map.of("userId", jwt.getSubject(), "data", "hello"));
+    }
+}
+```
+
+That's it. You get:
+- **Authentication** — via `@AuthenticationPrincipal Jwt jwt` (auto-validated JWE token)
+- **Rate Limiting** — via `@RateLimit` (Bucket4j, per-user)
+- **Audit Logging** — via `@LogActivity` (auto-persisted to `audit_log` table)
+- **Role Protection** — via `@PreAuthorize("hasRole('ADMIN')")` when needed
+
+### Available Annotations
+
+| Annotation | Purpose | Example |
+|------------|---------|---------|
+| `@RateLimit` | Throttle requests per user/IP/endpoint | `@RateLimit(requests = 10, periodSeconds = 60)` |
+| `@LogActivity` | Automatic audit trail | `@LogActivity(description = "User updated profile")` |
+| `@PreAuthorize` | Role-based access control | `@PreAuthorize("hasRole('ADMIN')")` |
+| `@SubscriptionRequired` | Feature gating by plan tier | Coming soon |
+
+---
 
 ## Common Commands
 
 ```bash
-# Stop containers
-docker compose down
+# Infrastructure
+docker compose up -d              # Start Keycloak + PostgreSQL
+docker compose down               # Stop containers
+docker compose down -v            # Stop + delete all data
+docker compose restart keycloak   # Restart Keycloak only
 
-# Stop containers and delete data
-docker compose down -v
+# Backend
+cd backend
+./mvnw spring-boot:run -pl archcore-app    # Run the app
+./mvnw clean install                        # Build all modules
+./mvnw test                                 # Run tests
 
-# Show logs
-docker logs archcore-keycloak
-docker logs archcore-postgres
-
-# Shell into container
-docker exec -it archcore-keycloak bash
-
-# Regenerate configs (after editing saas-init.yml)
-./deploy.sh && docker compose up -d
+# Config Regeneration
+./deploy.sh                                 # Regenerate from saas-init.yml
+./deploy.sh && docker compose up -d         # Regenerate + restart
 ```
+
+---
 
 ## Troubleshooting
 
-**Port conflict:** The `docker-compose.yml` uses `5433:5432`. Change it if you need a different port.
+| Issue | Solution |
+|-------|----------|
+| **Port 8080 in use** | Change `server.port` in `application.yml` or stop the conflicting process |
+| **Port 5433 conflict** | Edit `docker-compose.yml` to map to a different host port |
+| **Keycloak won't start** | Check logs: `docker logs archcore-keycloak` |
+| **Token validation fails** | Ensure Keycloak is running and `jwks.json` is generated in project root |
+| **Missing features** | Re-run `./deploy.sh` after editing `saas-init.yml`, then restart Keycloak |
 
-**Container not starting — check logs:**
-```bash
-docker logs archcore-keycloak
-docker logs archcore-postgres
-```
+---
 
-**Reset database:**
-```bash
-docker compose down -v
-./deploy.sh
-docker compose up -d
-```
+## License
 
-**Missing features in Keycloak:**
-- Check `saas-init.yml` feature flags are enabled
-- Re-run `./deploy.sh` to regenerate configs
-- Restart Keycloak: `docker compose restart keycloak`
+MIT

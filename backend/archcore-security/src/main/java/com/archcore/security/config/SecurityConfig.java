@@ -62,6 +62,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info", "/manage/health", "/manage/info", "/.well-known/jwks.json").permitAll()
+                .requestMatchers("/api/v1/public/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/billing/webhooks/**").permitAll()
                 .anyRequest().authenticated()
             )
