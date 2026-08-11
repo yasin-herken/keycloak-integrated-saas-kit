@@ -7,5 +7,6 @@
 
     <include file="db/changelog/changesets/00000-placeholder.xml"/>
     <include file="db/changelog/changesets/001-init-schema.xml"/>
+    <include file="db/changelog/changesets/002-billing-profile-audit-schema.xml"/>
 
 </databaseChangeLog>
