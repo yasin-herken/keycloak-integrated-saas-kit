@@ -21,10 +21,9 @@
     "host": "${KEYCLOAK_SMTP_HOST}",
     "port": "${KEYCLOAK_SMTP_PORT}",
     "from": "${KEYCLOAK_SMTP_FROM}",
-    "auth": {
-      "username": "${KEYCLOAK_SMTP_USER}",
-      "password": "${KEYCLOAK_SMTP_PASSWORD}"
-    },
+    "auth": "true",
+    "user": "${KEYCLOAK_SMTP_USER}",
+    "password": "${KEYCLOAK_SMTP_PASSWORD}",
     "starttls": "true",
     "ssl": "false"
   },
@@ -61,7 +60,7 @@
       "clientId": "${PROJECT_NAME}-client",
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
-      "secret": "",
+      "secret": "${ARCHCORE_CLIENT_SECRET}",
       "publicClient": false,
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": true,
