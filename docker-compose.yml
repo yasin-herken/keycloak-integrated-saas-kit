@@ -48,6 +48,8 @@ services:
       archcore.jwe.algorithm: ${ARCHCORE_JWE_ALGORITHM}
       archcore.jwe.encryption-method: ${ARCHCORE_JWE_ENCRYPTION_METHOD}
       archcore.jwe.key-id: ${ARCHCORE_JWE_KEY_ID}
+      # Client Secret for archcore-client
+      ARCHCORE_CLIENT_SECRET: ${ARCHCORE_CLIENT_SECRET}
       # SMTP Configuration for Forgot Password emails
       KEYCLOAK_SMTP_HOST: ${KEYCLOAK_SMTP_HOST}
       KEYCLOAK_SMTP_PORT: ${KEYCLOAK_SMTP_PORT}

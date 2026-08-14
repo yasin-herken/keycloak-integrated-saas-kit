@@ -15,9 +15,9 @@ services:
       # PostgreSQL
       - POSTGRES_HOST=postgresql
       - POSTGRES_PORT=5432
-      - POSTGRES_DB=keycloak
-      - POSTGRES_USER=keycloak
-      - POSTGRES_PASSWORD=gizlisifre
+      - POSTGRES_DB=saas_db
+      - POSTGRES_USER=saas_user
+      - POSTGRES_PASSWORD=saas_pass
     volumes:
       # Mount JWE key file (same as Kubernetes Secret mount)
       - ./keys/test-private.pem:/etc/secrets/jwe-private.pem:ro
@@ -45,9 +45,9 @@ services:
     ports:
       - "5433:5432"
     environment:
-      - POSTGRES_DB=keycloak
-      - POSTGRES_USER=keycloak
-      - POSTGRES_PASSWORD=gizlisifre
+      - POSTGRES_DB=saas_db
+      - POSTGRES_USER=saas_user
+      - POSTGRES_PASSWORD=saas_pass
     volumes:
       - postgresql-data:/var/lib/postgresql/data
     networks:

@@ -21,10 +21,9 @@
     "host": "smtp.gmail.com",
     "port": "587",
     "from": "noreply@yourdomain.com",
-    "auth": {
-      "username": "your-email@gmail.com",
-      "password": "your-app-password"
-    },
+    "auth": "true",
+    "user": "your-email@gmail.com",
+    "password": "your-app-password",
     "starttls": "true",
     "ssl": "false"
   },
@@ -61,7 +60,7 @@
       "clientId": "archcore-client",
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
-      "secret": "",
+      "secret": "7b341d3d43635667e28d0eb7f498a7a9532d233305ed3b5ef0f6fecea7ad73dc",
       "publicClient": false,
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": true,

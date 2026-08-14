@@ -87,6 +87,20 @@ rm -f "$PATHS_FILE"
 echo "   Generated: $ENV_OUTPUT_FILE"
 
 # -----------------------------------------------------------------------------
+# Generate Client Secret if empty
+# -----------------------------------------------------------------------------
+if [[ -z "${ARCHCORE_CLIENT_SECRET:-}" ]]; then
+  ARCHCORE_CLIENT_SECRET=$(openssl rand -hex 32)
+  # Remove empty entry if exists, then add new one
+  sed -i.bak '/^ARCHCORE_CLIENT_SECRET=$/d' "$ENV_OUTPUT_FILE" 2>/dev/null || true
+  echo "ARCHCORE_CLIENT_SECRET=${ARCHCORE_CLIENT_SECRET}" >> "$ENV_OUTPUT_FILE"
+  export ARCHCORE_CLIENT_SECRET="${ARCHCORE_CLIENT_SECRET}"
+  echo "   Generated: ARCHCORE_CLIENT_SECRET (auto-generated)"
+else
+  echo "   Using existing: ARCHCORE_CLIENT_SECRET"
+fi
+
+# -----------------------------------------------------------------------------
 # Dynamic Template Discovery and Processing
 # -----------------------------------------------------------------------------
 GENERATED_COUNT=0
@@ -175,6 +189,11 @@ ENV_SECTION="${ENV_SECTION}      # Keycloak provider config properties (passed v
       archcore.jwe.algorithm: \${ARCHCORE_JWE_ALGORITHM}
       archcore.jwe.encryption-method: \${ARCHCORE_JWE_ENCRYPTION_METHOD}
       archcore.jwe.key-id: \${ARCHCORE_JWE_KEY_ID}
+"
+
+# Client Secret (for realm template)
+ENV_SECTION="${ENV_SECTION}      # Client Secret for archcore-client
+      ARCHCORE_CLIENT_SECRET: \${ARCHCORE_CLIENT_SECRET}
 "
 
 # SMTP (conditional)
