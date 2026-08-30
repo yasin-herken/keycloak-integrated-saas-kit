@@ -13,5 +13,5 @@ import java.util.List;
 @Setter
 public class SecurityProperties {
 
-    private List<String> allowedOrigins = List.of("https://localhost:3000");
+    private List<String> allowedOrigins = List.of("http://localhost:3000");
 }
