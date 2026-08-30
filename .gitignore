@@ -24,6 +24,7 @@ keycloak_data/
 # Agent context (local only)
 .opencode/ARCHITECTURE.md
 .opencode/arch/
+opencode.json
 
 # OS
 .DS_Store
