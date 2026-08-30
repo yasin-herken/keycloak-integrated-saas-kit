@@ -128,28 +128,41 @@ keycloak-integrated-saas-kit/
 │   ├── archcore-core/             # Business logic layer
 │   │   └── src/main/java/com/archcore/core/
 │   │       ├── domain/            # Entities (Subscription, Plan, UserProfile, AuditLog)
+│   │       │   └── enums/         # PlanTier, SubscriptionStatus
 │   │       ├── repository/        # Spring Data JPA repositories
-│   │       └── service/           # Business services (BillingService, UserProfileService)
+│   │       └── service/           # Business services (BillingService, UserProfileService, AuditLogService)
 │   ├── archcore-security/         # Authentication infrastructure
 │   │   └── src/main/java/com/archcore/security/
-│   │       ├── config/            # SecurityConfig, JwtDecoderConfig, JweProperties
+│   │       ├── config/            # SecurityConfig, JwtDecoderConfig, JweProperties, NestedJweJWTProcessor
 │   │       └── converter/         # KeycloakJwtAuthenticationConverter
 │   └── archcore-app/              # Application entry point (HTTP layer)
 │       └── src/main/java/com/archcore/app/
-│           ├── controller/        # REST controllers (Sample, User, Admin, Billing)
-│           ├── ratelimit/         # @RateLimit annotation + Bucket4j filter
+│           ├── controller/        # REST controllers (UserProfile, UserRegistration, AccountDeletion, Billing, Test)
+│           ├── ratelimit/         # @RateLimit annotation + Bucket4j filter + aspect
 │           ├── audit/             # @LogActivity annotation + AOP aspect
-│           ├── exception/         # GlobalExceptionHandler + ErrorResponse
+│           ├── exception/         # GlobalExceptionHandler + ErrorResponse + ResourceNotFoundException
 │           ├── dto/               # Request/Response records
-│           └── filter/            # RateLimitFilter
+│           ├── filter/            # RateLimitFilter
+│           ├── billing/           # Stripe webhook handling
+│           ├── config/            # Bucket4jConfig, AsyncConfig
+│           └── util/              # LogMaskingUtility
 ├── keycloak-jwe-spi/              # Custom Keycloak SPI for JWE token encryption
 │   └── src/main/java/com/archcore/keycloak/spi/jwe/
 │       ├── JweAccessTokenResponseMapper.java
-│       └── JwksClient.java
-└── infrastructure/
-    └── keycloak/
-        ├── Dockerfile             # Custom Keycloak image with JWE SPI
-        └── templates/             # Realm JSON templates (dev/prod)
+│       ├── JwksClient.java
+│       └── JweProviderConfig.java
+├── infrastructure/
+│   └── keycloak/
+│       ├── Dockerfile             # Custom Keycloak image with JWE SPI
+│       └── templates/             # Realm JSON templates (dev/prod)
+└── .opencode/
+    ├── ARCHITECTURE.md            # Quick reference and current state
+    ├── RULES.md                   # Global agent rules
+    ├── ADR.md                     # Architecture Decision Records
+    └── arch/                      # Detailed documentation
+        ├── auth.md                # Authentication & JWE SPI
+        ├── infra.md               # Docker & infrastructure
+        └── config.md              # Configuration flow
 ```
 
 ### Core vs. Domain Isolation
@@ -268,4 +281,10 @@ cd backend
 
 ## License
 
-MIT
+This project is licensed under the **ArchCore Commercial License** — see the [LICENSE](LICENSE) file for details.
+
+**Key Restrictions:**
+- ❌ No redistribution or reselling of the source code
+- ❌ No competing products (boilerplates, starter kits) built with this code
+- ❌ No public repositories with the source code
+- ✅ Build and deploy unlimited personal or commercial projects

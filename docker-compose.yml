@@ -63,6 +63,7 @@ services:
       - "8080:8080"
     volumes:
       - ./infrastructure/keycloak/templates:/opt/keycloak/data/import:ro
+      - ./infrastructure/keycloak/themes/archcore:/opt/keycloak/themes/archcore:ro
       - keycloak_data:/opt/keycloak/data
     command: ["start-dev", "--import-realm"]
 

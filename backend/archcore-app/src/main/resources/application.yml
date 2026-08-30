@@ -61,7 +61,7 @@ management:
 
 archcore:
   security:
-    allowed-origins: https://localhost:3000
+    allowed-origins: http://localhost:3000
   rate-limit:
     enabled: true
     key-strategy: COMPOSITE

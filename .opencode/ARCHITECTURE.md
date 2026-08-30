@@ -15,14 +15,31 @@
 - Frontend = dumb components (no optimization)
 - Every new file → Git immediately
 
-## Current State (2026-07-30)
+## Current State (2026-08-14)
 - ✅ Keycloak + PostgreSQL Docker setup
-- ✅ JWE SPI for token encryption
+- ✅ JWE SPI for token encryption (keycloak-jwe-spi module)
 - ✅ Templating engine (deploy.sh)
 - ✅ Feature flags system (forgotPassword, googleLogin, smtp)
 - ✅ Dynamic docker-compose.yml generation
 - ✅ Realm JSON post-processing with jq
-- ⏳ Backend scaffold (Spring Boot 4 + Java 25)
+- ✅ Backend scaffold (Spring Boot 4 + Java 25) — Multi-module complete
+- ✅ Security module — JWE validation, Keycloak integration, SecurityConfig
+- ✅ Core module — Domain entities (Subscription, Plan, UserProfile, AuditLog), repositories, services
+- ✅ App module — REST controllers, DTOs, AOP aspects, filters
+- ✅ Rate limiting — Bucket4j + @RateLimit annotation
+- ✅ Audit logging — @LogActivity + AOP aspect
+- ✅ Global exception handling — GlobalExceptionHandler + ErrorResponse
+- ✅ User profile management — CRUD + Keycloak sync
+- ✅ Billing — Stripe webhook handling
+- ✅ User registration & account deletion
+- ✅ Frontend — Next.js 15 with SSO integration
+  - Landing page with hero, features, pricing, about, CTA sections
+  - Sign In/Sign Up pages with Keycloak + Google SSO
+  - Dashboard for authenticated users
+  - Middleware for route protection
+  - Tailwind CSS styling
+- ⏳ Redis cache (planned)
+- ⏳ Kubernetes manifests (planned)
 
 ## Detailed Documentation
 - `arch/auth.md` — Authentication & JWE SPI details
