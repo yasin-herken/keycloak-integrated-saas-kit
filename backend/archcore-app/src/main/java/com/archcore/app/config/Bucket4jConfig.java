@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties(RateLimitProperties.class)
+@EnableConfigurationProperties({RateLimitProperties.class, BillingProperties.class})
 public class Bucket4jConfig {
 
     @Bean

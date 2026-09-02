@@ -3,6 +3,7 @@ package com.archcore.app.billing;
 import com.archcore.core.service.BillingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -10,6 +11,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
 @Service
+@ConditionalOnProperty(prefix = "features.billing", name = "provider", havingValue = "stripe")
 public class StripeWebhookService implements BillingWebhookService {
 
     private static final Logger log = LoggerFactory.getLogger(StripeWebhookService.class);

@@ -29,7 +29,8 @@ public class GlobalExceptionHandler {
         AccessDeniedException.class, HttpStatus.FORBIDDEN,
         AuthenticationException.class, HttpStatus.UNAUTHORIZED,
         BadCredentialsException.class, HttpStatus.UNAUTHORIZED,
-        ResourceNotFoundException.class, HttpStatus.NOT_FOUND
+        ResourceNotFoundException.class, HttpStatus.NOT_FOUND,
+        BillingDisabledException.class, HttpStatus.NOT_FOUND
     );
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
