@@ -77,6 +77,10 @@ archcore:
   billing:
     provider: stripe
     webhook-secret: ${BILLING_WEBHOOK_SECRET:}
+features:
+  billing:
+    enabled: ${FEATURES_BILLING_ENABLED:false}
+    provider: ${FEATURES_BILLING_PROVIDER:none}
   audit:
     enabled: true
     async: true
